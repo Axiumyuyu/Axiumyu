@@ -30,6 +30,16 @@ sourceSets {
     }
 }
 
+tasks.named<org.gradle.jvm.tasks.Jar>("jar") {
+    if (withTest) {
+        // 只有开启了测试模式时，才添加 -test 后缀
+        archiveClassifier.set("test")
+    } else {
+        // 生产模式下，文件名不带任何 classifier
+        archiveClassifier.set("")
+    }
+}
+
 kotlin {
     jvmToolchain(21)
 }
