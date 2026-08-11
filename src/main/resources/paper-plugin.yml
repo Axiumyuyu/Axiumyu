@@ -1,0 +1,8 @@
+name: Axiumyu
+version: '${version}'
+
+main: xyz.axiumyu.Axiumyu
+bootstrapper: xyz.axiumyu.AxiumyuBootstrap
+loader: xyz.axiumyu.AxiumyuLoader
+api-version: '1.21.11'
+load: POSTWORLD
