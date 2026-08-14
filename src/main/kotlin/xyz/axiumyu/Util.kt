@@ -52,3 +52,27 @@ fun String.toNamespacedKey(): NamespacedKey {
         NamespacedKey(value[0], value[1])
     }
 }
+
+/**
+ * 递归移除该 Component 及其所有子组件上的点击事件。
+ * 其他样式（颜色、悬停事件、插入文本等）均保留。
+ */
+fun Component.noClick(): Component {
+    val cleanedChildren = children().map { it.noClick() }
+    return clickEvent(null).children(cleanedChildren)
+}
+
+/**
+ * 将 MiniMessage 字符串解析为 Component，并移除所有 click 标签。
+ * 如果字符串中不包含 "<click"，则跳过正则，直接解析。
+ */
+fun String.noClick(): String {
+    val CLICK_TAG_REGEX = Regex("""</?click:[^>]*>""")
+    // 快速路径：90% 的消息其实没有 click 标签，避免不必要的正则开销
+    val source = if (this.contains("<click", ignoreCase = true)) {
+        this.replace(CLICK_TAG_REGEX, "")
+    } else {
+        this
+    }
+    return source
+}

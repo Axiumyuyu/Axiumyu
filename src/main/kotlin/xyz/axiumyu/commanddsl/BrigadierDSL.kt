@@ -11,6 +11,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.Bukkit.getPluginManager
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import xyz.axiumyu.addPerm
 
 
 @DslMarker
@@ -44,12 +45,8 @@ object PermissionRegistry {
             val pm = getPluginManager()
             debugLog("Registering deferred permissions (${pendingPermissions.size} total)...")
             pendingPermissions.forEach { (permName, default) ->
-                if (pm.getPermission(permName) == null) {
-                    pm.addPermission(Permission(permName, default))
-                    debugLog("Registered new permission in Bukkit: '$permName' ($default)")
-                } else {
-                    debugLog("Permission '$permName' already exists in Bukkit PluginManager")
-                }
+                pm.addPerm(permName, default)
+                debugLog("Registered permission in Bukkit: '$permName' ($default)")
             }
             pendingPermissions.clear()
         } catch (e: Exception) {

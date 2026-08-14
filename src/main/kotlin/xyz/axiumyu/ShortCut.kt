@@ -4,6 +4,7 @@ import io.papermc.paper.registry.RegistryAccess.registryAccess
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.keys.tags.EnchantmentTagKeys
 import io.papermc.paper.registry.keys.tags.EnchantmentTagKeys.TREASURE
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Keyed
@@ -11,8 +12,11 @@ import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
+import org.bukkit.plugin.PluginManager
 
 val mm = MiniMessage.miniMessage()
 
@@ -75,3 +79,20 @@ fun d(s: String) = mm.deserialize(s)
  * 序列化
  */
 fun s(c: Component): String = mm.serialize(c)
+
+/**
+ * 添加权限
+ */
+fun PluginManager.addPerm(perm: String, def: PermissionDefault = PermissionDefault.OP) {
+    val perm = Permission(perm, def)
+    if (!permissions.contains(perm)) {
+        addPermission(perm)
+    }
+}
+
+/**
+ * 需求附魔并返回，若不存在直接报错
+ */
+fun requireEnchantment(namespace: String = Key.MINECRAFT_NAMESPACE, key: String): Enchantment {
+    return getRegistry(RegistryKey.ENCHANTMENT, NamespacedKey(namespace, key)) ?: throw IllegalStateException("Enchantment: $namespace:$key not found!")
+}
