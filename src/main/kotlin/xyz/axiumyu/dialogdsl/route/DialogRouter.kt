@@ -14,6 +14,7 @@ interface DialogRouteContext {
     fun navigate(route: RouteBase)
     fun replace(route: RouteBase)
     fun goBack()
+    fun updateBack(route: RouteBase)
     fun abortTransaction()
 }
 
@@ -67,6 +68,19 @@ object DialogRouter {
         }
     }
 
+    private fun updateBack(player: Player, route: RouteBase) {
+        val stack = historyStacks[player.uniqueId] ?: return
+        if (stack.size > 1) {
+            stack.removeLast() // 弹出当前页
+            stack.removeLast() // 弹出待更新的上一页
+            stack.addLast(route) // 压入更新后的上一页
+            render(player, route)
+        } else {
+            clearHistory(player) // 无上一页：关闭并清空
+            player.closeDialog()
+        }
+    }
+
     private fun render(player: Player, route: RouteBase) {
 
         // 生成当前页面专属的上下文实体 (实现了刚才定义的接口)
@@ -79,6 +93,8 @@ object DialogRouter {
             override fun replace(route: RouteBase) = replace(player, route)
 
             override fun goBack() = goBack(player)
+
+            override fun updateBack(route: RouteBase) = updateBack(player, route)
 
             override fun abortTransaction() {
                 if (route is AtomicRoute) route.onRollback(player)

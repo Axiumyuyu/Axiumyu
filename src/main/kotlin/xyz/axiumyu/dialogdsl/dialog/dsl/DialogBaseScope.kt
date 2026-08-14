@@ -60,8 +60,8 @@ class DialogBaseScope(
         id: String,
         name: Component,
         initial: Boolean,
-        onTrue: String, // 注意：如果你使用的 Paper 版本这里接受的是 String，保持原样。通常可能是 Component
-        onFalse: String
+        onTrue: String = "true",
+        onFalse: String = "false"
     ) {
         // 注意：根据你的原始代码，这里没有调用 .build()，如果 API 实际上返回的是 Builder，你需要补上 .build()
         inputList.add(DialogInput.bool(id, name, initial, onTrue, onFalse))

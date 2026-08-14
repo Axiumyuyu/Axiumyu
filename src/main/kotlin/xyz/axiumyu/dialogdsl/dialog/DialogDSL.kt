@@ -2,8 +2,6 @@ package xyz.axiumyu.dialogdsl.dialog
 
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogRegistryEntry
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import xyz.axiumyu.dialogdsl.dialog.dsl.DialogRootScope
 
 // 1. 基础图纸接口
@@ -18,8 +16,6 @@ sealed interface BaseDialog {
 fun BaseDialog.build(): Dialog {
     return Dialog.create { it.empty().apply(this.buildAction) }
 }
-
-fun Component.plainText() = PlainTextComponentSerializer.plainText().serialize(this)
 
 inline fun DialogSetup(crossinline block: DialogRootScope.() -> Unit): BaseDialog {
     return NormalDialog { DialogRootScope(this).block() }
