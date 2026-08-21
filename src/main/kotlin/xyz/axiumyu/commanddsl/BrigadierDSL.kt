@@ -44,7 +44,7 @@ object PermissionRegistry {
             val pm = getPluginManager()
             debugLog("Registering deferred permissions (${pendingPermissions.size} total)...")
             pendingPermissions.forEach { (permName, default) ->
-                pm.addPerm(permName, default)
+                pm.addPerm(permName, default) // 这个方法已包含去重
                 debugLog("Registered permission in Bukkit: '$permName' ($default)")
             }
             pendingPermissions.clear()
