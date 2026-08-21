@@ -25,3 +25,5 @@ enum class Color(rgb: Int){
 
     val color = color(rgb)
 }
+
+const val SV = "sakuravalley"

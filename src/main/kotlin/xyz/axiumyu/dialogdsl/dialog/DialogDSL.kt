@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package xyz.axiumyu.dialogdsl.dialog
 
 import io.papermc.paper.dialog.Dialog

@@ -1,5 +1,6 @@
 package xyz.axiumyu
 
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.registry.RegistryAccess.registryAccess
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.keys.tags.EnchantmentTagKeys
@@ -12,6 +13,7 @@ import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemType
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.persistence.PersistentDataContainer
@@ -48,6 +50,12 @@ fun String?.toNumber() : Number{
  */
 val <T : PersistentDataHolder> T.pdc: PersistentDataContainer
     get() = persistentDataContainer
+
+/**
+ * 获取物品的默认名称
+ */
+val ItemType.name
+    get() = this.getDefaultData(DataComponentTypes.ITEM_NAME)?.plainText
 
 /**
  * 注册表获取
@@ -95,4 +103,11 @@ fun PluginManager.addPerm(perm: String, def: PermissionDefault = PermissionDefau
  */
 fun requireEnchantment(namespace: String = Key.MINECRAFT_NAMESPACE, key: String): Enchantment {
     return getRegistry(RegistryKey.ENCHANTMENT, NamespacedKey(namespace, key)) ?: throw IllegalStateException("Enchantment: $namespace:$key not found!")
+}
+
+/**
+ * 需求附魔并返回，若不存在直接报错
+ */
+fun requireEnchantment(key: NamespacedKey): Enchantment {
+    return getRegistry(RegistryKey.ENCHANTMENT, key) ?: throw IllegalStateException("Enchantment: $key not found!")
 }

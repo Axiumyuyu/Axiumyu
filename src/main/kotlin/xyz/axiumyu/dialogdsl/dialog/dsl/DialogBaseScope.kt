@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 package xyz.axiumyu.dialogdsl.dialog.dsl
 
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -8,9 +9,9 @@ import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput
 import io.papermc.paper.registry.data.dialog.input.TextDialogInput
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.ItemStack
+import xyz.axiumyu.d
 
 @PaperDialogDsl
-@SuppressWarnings("UnstableApiUsage")
 class DialogBaseScope(
     private val nativeBuilder: DialogBase.Builder
 ) : DialogBase.Builder by nativeBuilder {
@@ -76,19 +77,37 @@ class DialogBaseScope(
     fun SingleOptionInput(
         id: String,
         name: Component,
-        entries: List<SingleOptionDialogInput.OptionEntry>
+        initial: String? = null,
+        labelVisible: Boolean = true,
+        width: Int = 150,
+        block: SingleOptionScope.() -> Unit
     ) {
-        inputList.add(DialogInput.singleOption(id, name, entries).build())
+        val scope = SingleOptionScope(initial).apply(block)
+        inputList.add(
+            DialogInput.singleOption(id, name, scope.entries)
+                .width(width)
+                .labelVisible(labelVisible)
+                .build()
+        )
     }
 
-    fun SingleOptionInput(
+    fun <T : Enum<T>> SingleOptionInput(
         id: String,
-        width: Int,
-        entries: List<SingleOptionDialogInput.OptionEntry>,
         name: Component,
-        labelVisible: Boolean
+        initial: T,
+        labelVisible: Boolean = true,
+        width: Int = 150,
+        dd: (String) -> Component = ::d
     ) {
-        inputList.add(DialogInput.singleOption(id, width, entries, name, labelVisible))
+        val entries = initial.declaringJavaClass.enumConstants.map { constant ->
+            SingleOptionDialogInput.OptionEntry.create(constant.name, dd(constant.name), constant == initial)
+        }
+        inputList.add(
+            DialogInput.singleOption(id, name, entries)
+                .width(width)
+                .labelVisible(labelVisible)
+                .build()
+        )
     }
 
     // --- Text Input ---
@@ -118,3 +137,4 @@ class DialogBaseScope(
         )
     }
 }
+

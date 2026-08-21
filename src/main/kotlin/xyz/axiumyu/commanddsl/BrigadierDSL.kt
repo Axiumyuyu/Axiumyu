@@ -18,7 +18,7 @@ import xyz.axiumyu.addPerm
 annotation class BrigadierDsl
 
 private fun debugLog(message: String) {
-//    println("[BrigadierDSL-Debug] $message")
+    println("[BrigadierDSL-Debug] $message")
 }
 
 
@@ -32,7 +32,7 @@ object PermissionRegistry {
     /**
      * 暂存待注册权限
      */
-    fun defer(permName: String, default: PermissionDefault) {
+    internal fun defer(permName: String, default: PermissionDefault) {
         pendingPermissions.putIfAbsent(permName, default)
         debugLog("Deferred permission: '$permName' (Default: $default)")
     }
@@ -40,7 +40,7 @@ object PermissionRegistry {
     /**
      * 必须在 JavaPlugin.onEnable() 中调用
      */
-    fun registerAll() {
+    internal fun registerAll() {
         try {
             val pm = getPluginManager()
             debugLog("Registering deferred permissions (${pendingPermissions.size} total)...")
@@ -172,7 +172,7 @@ class NodeBuilder(
         PermissionRegistry.defer(permName, default)
     }
 
-    internal fun buildLiteral(): LiteralArgumentBuilder<CommandSourceStack> {
+    fun buildLiteral(): LiteralArgumentBuilder<CommandSourceStack> {
         debugLog("Building Literal Node: '$name' (Children: ${children.size}, HasExecutor: ${executor != null}, HasRequirement: ${requirement != null})")
         val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(name)
 

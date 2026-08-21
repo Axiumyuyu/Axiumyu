@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package xyz.axiumyu.dialogdsl.dialog.dsl
 
 import io.papermc.paper.dialog.DialogResponseView

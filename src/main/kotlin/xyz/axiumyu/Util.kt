@@ -1,9 +1,15 @@
+@file:Suppress("UnstableApiUsage")
+
 package xyz.axiumyu
 
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemEnchantments
 import io.papermc.paper.datacomponent.item.ItemLore
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.NamespacedKey
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import kotlin.math.cos
 import kotlin.math.sin
@@ -35,6 +41,11 @@ fun lore(vararg lines: String): List<Component> = lines.map { mm.deserialize(it)
  * 直接从mm文本列表转换为ItemLore
  */
 fun itemLore(vararg line: String): ItemLore = ItemLore.lore(lore(*line))
+
+/**
+ * 从map直接转ItemEnchantment
+ */
+fun itemEnch(vararg ens: Pair<Enchantment, Int>) : ItemEnchantments = ItemEnchantments.itemEnchantments(mapOf(*ens))
 
 /**
  * 将Componet 转换为 PlainText
@@ -75,4 +86,30 @@ fun String.noClick(): String {
         this
     }
     return source
+}
+
+/**
+ * 将首字母大写
+ */
+fun String.capitalize(): String{
+    return lowercase().replaceFirstChar { it.uppercase() }
+}
+
+/**
+ * 直接减少物品耐久
+ * 不会运行其他逻辑
+ * 自动处理边缘情况
+ */
+fun ItemStack.damage(damage: Int = 1){
+    val maxDmg = if (hasData(DataComponentTypes.MAX_DAMAGE)){
+       getData(DataComponentTypes.MAX_DAMAGE)!!
+    } else return
+    val current = if (hasData(DataComponentTypes.DAMAGE)){
+        getData(DataComponentTypes.DAMAGE)!!
+    } else 0
+    if (current + damage >= maxDmg) {
+        subtract()
+        return
+    }
+    setData(DataComponentTypes.DAMAGE, current + damage)
 }
