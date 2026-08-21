@@ -9,7 +9,6 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import org.bukkit.Bukkit.getPluginManager
-import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import xyz.axiumyu.addPerm
 
