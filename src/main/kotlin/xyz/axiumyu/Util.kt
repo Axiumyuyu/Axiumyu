@@ -83,10 +83,9 @@ fun Component.noClick(): Component {
  * 如果字符串中不包含 "<click"，则跳过正则，直接解析。
  */
 fun String.noClick(): String {
-    val CLICK_TAG_REGEX = Regex("""</?click:[^>]*>""")
     // 快速路径：90% 的消息其实没有 click 标签，避免不必要的正则开销
     val source = if (this.contains("<click", ignoreCase = true)) {
-        this.replace(CLICK_TAG_REGEX, "")
+        this.replace(Regex("""</?click:[^>]*>"""), "")
     } else {
         this
     }
