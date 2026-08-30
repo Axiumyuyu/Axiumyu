@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage", "Unused")
 package xyz.axiumyu.dialogdsl.route
 
 import net.kyori.adventure.text.Component

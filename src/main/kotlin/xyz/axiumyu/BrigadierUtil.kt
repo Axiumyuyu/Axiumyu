@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage", "Unused")
 package xyz.axiumyu
 
 import com.mojang.brigadier.context.CommandContext
@@ -20,6 +21,6 @@ fun <T> SuggestionsBuilder.suggestAll(list : Collection<T>) {
 fun node(name: String) = Commands.literal(name)
 
 fun error(ctx: CommandContext<CommandSourceStack>, msg: String): Int {
-    ctx.source.sender.sendMessage(mm.deserialize("<red>$msg"))
+    ctx.source.sender.sendMessage(d("<red>$msg", MMMode.ADMIN))
     return 0
 }

@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "Unused")
 
 package xyz.axiumyu
 
@@ -35,7 +35,7 @@ fun pitchYaw2Vector(pitch: Number, yaw: Number): Vector {
 /**
  * 将MiniMessage文本列表转换为Component列表
  */
-fun lore(vararg lines: String): List<Component> = lines.map { mm.deserialize(it) }
+fun lore(vararg lines: String): List<Component> = lines.map { d(it) }
 
 /**
  * 直接从mm文本列表转换为ItemLore
@@ -43,9 +43,14 @@ fun lore(vararg lines: String): List<Component> = lines.map { mm.deserialize(it)
 fun itemLore(vararg line: String): ItemLore = ItemLore.lore(lore(*line))
 
 /**
- * 从map直接转ItemEnchantment
+ * 从 pairs 直接转 ItemEnchantment
  */
 fun itemEnch(vararg ens: Pair<Enchantment, Int>) : ItemEnchantments = ItemEnchantments.itemEnchantments(mapOf(*ens))
+
+/**
+ * 从 map 直接转 ItemEnchantment
+ */
+fun itemEnch(ens: Map<Enchantment, Int>) : ItemEnchantments = ItemEnchantments.itemEnchantments(ens)
 
 /**
  * 将Componet 转换为 PlainText

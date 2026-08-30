@@ -3,7 +3,7 @@ package xyz.axiumyu.dialogdsl
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDeathEvent
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import xyz.axiumyu.dialogdsl.route.AtomicRoute
 import xyz.axiumyu.dialogdsl.route.DialogRouter
@@ -16,8 +16,8 @@ object RouteCleanUp : Listener {
     }
 
     @EventHandler
-    fun onPlayerDeath(event: EntityDeathEvent) {
-        handleExit(event.entity as? Player ?: return)
+    fun onPlayerDeath(event: PlayerDeathEvent) {
+        handleExit(event.player)
     }
 
     private fun handleExit(player: Player) {

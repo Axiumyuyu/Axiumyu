@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage", "Unused")
 package xyz.axiumyu
 
 import net.kyori.adventure.text.format.TextColor.color

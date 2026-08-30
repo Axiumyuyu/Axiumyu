@@ -1,8 +1,9 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "Unused")
 
 package xyz.axiumyu
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.plugin.bootstrap.BootstrapContext
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager
@@ -13,13 +14,13 @@ import io.papermc.paper.registry.event.RegistryEvents
 import io.papermc.paper.registry.keys.DialogKeys
 import io.papermc.paper.registry.keys.EnchantmentKeys
 import io.papermc.paper.registry.keys.ItemTypeKeys
-import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys
 import io.papermc.paper.registry.set.RegistrySet
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.EquipmentSlotGroup
-import xyz.axiumyu.commanddsl.NodeBuilder
+import xyz.axiumyu.commanddsl.BaseNode
+import xyz.axiumyu.commanddsl.PermissionRegistry
+import xyz.axiumyu.commanddsl.buildBrigadier
 import xyz.axiumyu.dialogdsl.dialog.BaseDialog
 
 /**
@@ -38,18 +39,18 @@ fun LifecycleEventManager<BootstrapContext>.registerCommand(
 }
 
 /**
- * 注册命令
+ * 在 `LifecycleEvents.COMMANDS` 回调内完成蓝图 -> Brigadier 树的转换与注册。
+ * 必须在 Bootstrap 阶段（`PluginBootstrap.bootstrap`）内调用，杜绝提前接触 Bukkit API。
+ *
+ * 权限的最终刷入不在此处发生：这里只是把权限排队，真正写入 `PluginManager`
+ * 需要在 `onEnable()` 中显式调用 [PermissionRegistry.registerAll]。
  */
-fun LifecycleEventManager<BootstrapContext>.registerCommand(
-    block: NodeBuilder,
-    desc: String = ""
-) {
-    registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
-        event.registrar().register(
-            block.buildLiteral().build(),
-            desc
-        )
-    })
+fun LifecycleEventManager<BootstrapContext>.registerCommand(block: BaseNode, desc: String = "") {
+    this.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+        @Suppress("UNCHECKED_CAST")
+        val rootNode = buildBrigadier(block, null).build() as LiteralCommandNode<CommandSourceStack>
+        event.registrar().register(rootNode, desc)
+    }
 }
 
 /**

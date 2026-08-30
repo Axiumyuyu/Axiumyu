@@ -8,7 +8,7 @@ import io.papermc.paper.registry.data.dialog.DialogRegistryEntry
 import io.papermc.paper.registry.data.dialog.type.DialogType
 import io.papermc.paper.registry.set.RegistrySet
 import net.kyori.adventure.text.Component
-import xyz.axiumyu.mm
+import xyz.axiumyu.d
 
 @PaperDialogDsl
 @SuppressWarnings("UnstableApiUsage")
@@ -48,7 +48,7 @@ class DialogRootScope(@PublishedApi internal val entryBuilder: DialogRegistryEnt
     ) {
         val scope = DialogTypeScope().apply(block)
         if (isRoot && scope.exitButton == null) {
-            scope.ExitButton(mm.deserialize("<red>关闭菜单"), mm.deserialize("彻底退出"), 100)
+            scope.ExitButton(d("<red>关闭菜单"), d("彻底退出"), 100)
         }
         val btns = scope.buttons
         val finalExit = scope.exitButton

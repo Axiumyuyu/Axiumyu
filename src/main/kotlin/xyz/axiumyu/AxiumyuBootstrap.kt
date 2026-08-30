@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage", "Unused")
 package xyz.axiumyu
 
 import io.papermc.paper.plugin.bootstrap.BootstrapContext
