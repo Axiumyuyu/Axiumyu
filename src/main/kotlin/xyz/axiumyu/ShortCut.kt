@@ -104,6 +104,11 @@ fun <T : Keyed> RegistryKey<T>.get(name: NamespacedKey) =
     registryAccess().getRegistry(this).get(name)
 
 /**
+ * 获取物品所有附魔，自动检测类型
+ */
+val ItemStack.enchs get() = getData(STORED_ENCHANTMENTS)?.enchantments() ?: getData(ENCHANTMENTS)?.enchantments() ?: mapOf()
+
+/**
  * 获取物品
  */
 fun getItem(name: String) = getRegistry(RegistryKey.ITEM, NamespacedKey.minecraft(name))
@@ -223,3 +228,9 @@ fun ItemStack.removeEnch(ench: Enchantment) {
         setData(type, itemEnch(enchants))
     }
 }
+
+inline fun itemStack(type: ItemType, data: ItemStack.() -> Unit): ItemStack {
+    return  type.createItemStack(1).apply(data)
+}
+
+fun itemStack(type: ItemType) = type.createItemStack(1)

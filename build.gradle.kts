@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     id("com.gradleup.shadow") version "9.6.1"
     `maven-publish`
 }
@@ -12,6 +12,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.11.0")
 }
 
 val withTest = project.hasProperty("addTest")
@@ -60,11 +61,7 @@ tasks {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            from(components["java"]) // 将标准的 Java 产物（JAR）和依赖关系包含进 POM
-
-            // 【注意】如果你使用了 shadowJar 插件来打入 Kotlin 运行时依赖，
-            // 请将上面的 from(components["java"]) 替换为下面这行：
-            // artifact(tasks.named("shadowJar"))
+            from(components["java"])
         }
     }
 }

@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "Unused")
 package xyz.axiumyu.dialogdsl.dialog.dsl
 
 import io.papermc.paper.registry.data.dialog.DialogBase

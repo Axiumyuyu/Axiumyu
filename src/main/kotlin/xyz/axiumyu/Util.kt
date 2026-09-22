@@ -5,8 +5,11 @@ package xyz.axiumyu
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemEnchantments
 import io.papermc.paper.datacomponent.item.ItemLore
+import io.papermc.paper.registry.RegistryAccess.registryAccess
+import io.papermc.paper.registry.RegistryKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
@@ -100,6 +103,16 @@ fun String.capitalize(): String{
 }
 
 /**
+ * 给字符串加引号
+ */
+fun String.quote() = "\"$this\""
+
+/**
+ * 给字符串去引号
+ */
+fun String.deQuote() = removePrefix("\"").removeSuffix("\"")
+
+/**
  * 直接减少物品耐久
  * 不会运行其他逻辑
  * 自动处理边缘情况
@@ -117,3 +130,9 @@ fun ItemStack.damage(damage: Int = 1){
     }
     setData(DataComponentTypes.DAMAGE, current + damage)
 }
+
+/**
+ * 获取注册表的所有项列表
+ */
+fun <T : Keyed> getRegistries(category: RegistryKey<T>): List<String> =
+    registryAccess().getRegistry(category).stream().map { it.key.toString() }.toList()
