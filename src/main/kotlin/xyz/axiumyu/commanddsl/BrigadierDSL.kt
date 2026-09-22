@@ -351,7 +351,7 @@ object PermissionRegistry {
  * - TAB 补全按 remaining 做不区分大小写前缀过滤，直接填充原生 builder（需求 7.1）。
  * - 执行闭包异常直接抛出，返回值固定为成功（需求 7.2）。
  */
-fun buildBrigadier(
+internal fun buildBrigadier(
     node: BaseNode,
     parentPath: String?
 ): ArgumentBuilder<CommandSourceStack, *> {
