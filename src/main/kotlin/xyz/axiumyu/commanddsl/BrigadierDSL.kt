@@ -39,8 +39,11 @@ sealed class BaseNode(val name: String, val permPrefix: String? = null) {
     /** `Require { ... }` 累积的谓词，最终与权限谓词一起以 && 组合（需求 5.3）。 */
     internal val requirements: MutableList<(CommandSourceStack) -> Boolean> = mutableListOf()
 
-    /** `Perm(suffix, default)` 累积的待解析权限条目：(后缀, 默认值)。 */
-    internal val permEntries: MutableList<Pair<String, PermissionDefault>> = mutableListOf()
+    /**
+     * `Perm(name, default)` 累积的待解析权限条目：(覆盖名, 默认值)。
+     * `name` 为 null 时代表不覆盖，直接使用节点自身的 [pathSegment]。
+     */
+    internal val permEntries: MutableList<Pair<String?, PermissionDefault>> = mutableListOf()
 
     /** `Execute { ... }` 设置的执行闭包，后设置者覆盖前者。 */
     internal var executeBlock: ((CommandParams, CommandSourceStack) -> Unit)? = null
@@ -94,11 +97,25 @@ sealed class BaseNode(val name: String, val permPrefix: String? = null) {
      * 1. 等价于 `Require { it.sender.hasPermission(完整权限字符串) }`；
      * 2. 完整权限字符串与默认值会在 [registerCommand] 转换阶段解析并暂存至 [PermissionRegistry]。
      *
+     * `name` **覆盖当前节点自身在权限路径中的段名**，而不是在其后追加：
+     * 完整权限 = 父节点权限路径 + "." + (name ?: 当前节点的 [pathSegment])。
+     * 不传 `name` 时效果等价于直接对当前节点的路径声明权限；传入 `name` 时相当于
+     * “借用”当前位置，声明一个路径最后一段不同的权限。
+     *
+     * ```
+     * Node("testcmd") {
+     *     Node("usethis") {
+     *         Perm()          // testcmd.usethis
+     *         Perm("over")    // testcmd.over
+     *     }
+     * }
+     * ```
+     *
      * 注意：完整权限路径依赖节点在最终树中的位置，而蓝图可能被多处复用，
-     * 因此这里只记录“后缀 + 默认值”，真正的路径拼接推迟到树被固化之后（转换阶段）完成。
+     * 因此这里只记录“覆盖名 + 默认值”，真正的路径拼接推迟到树被固化之后（转换阶段）完成。
      */
-    fun Perm(suffix: String, default: PermissionDefault = PermissionDefault.OP) {
-        permEntries.add(suffix to default)
+    fun Perm(name: String? = null, default: PermissionDefault = PermissionDefault.OP) {
+        permEntries.add(name to default)
     }
 
     /** 追加一个自定义可见性谓词，多次调用以 && 组合（需求 5.3）。 */
@@ -237,9 +254,9 @@ class LeafGroupScope(private val leaves: List<BaseNode>) {
         return template
     }
 
-    /** 覆盖操作：同时作用于每一个叶子节点的权限队列。 */
-    fun Perm(suffix: String, default: PermissionDefault = PermissionDefault.OP) {
-        leaves.forEach { it.permEntries.add(suffix to default) }
+    /** 覆盖操作：同时作用于每一个叶子节点的权限队列（语义同 [BaseNode.Perm]：覆盖节点自身段名而非追加）。 */
+    fun Perm(name: String? = null, default: PermissionDefault = PermissionDefault.OP) {
+        leaves.forEach { it.permEntries.add(name to default) }
     }
 
     /** 覆盖操作：同时作用于每一个叶子节点的 requirement 列表。 */
@@ -315,7 +332,7 @@ object PermissionRegistry {
     fun registerAll() {
         val pluginManager = Bukkit.getPluginManager()
         queue.distinctBy { it.first }.forEach { (permission, default) ->
-           pluginManager.addPerm(permission, default)
+            pluginManager.addPerm(permission, default)
         }
         queue.clear()
     }
@@ -334,16 +351,17 @@ object PermissionRegistry {
  * - TAB 补全按 remaining 做不区分大小写前缀过滤，直接填充原生 builder（需求 7.1）。
  * - 执行闭包异常直接抛出，返回值固定为成功（需求 7.2）。
  */
-fun buildBrigadier(
+private fun buildBrigadier(
     node: BaseNode,
     parentPath: String?
 ): ArgumentBuilder<CommandSourceStack, *> {
 
     val currentPath = if (parentPath == null) node.pathSegment else "$parentPath.${node.pathSegment}"
 
-    // 解析权限队列：生成谓词的同时把完整权限字符串送入注册队列。
-    val permPredicates: List<(CommandSourceStack) -> Boolean> = node.permEntries.map { (suffix, default) ->
-        val fullPermission =if (suffix.isEmpty()) currentPath else "$currentPath.$suffix"
+    // 解析权限队列：完整权限 = 父路径 + "." + (覆盖名 ?: 节点自身段名)，即覆盖而非追加（需求变更）。
+    val permPredicates: List<(CommandSourceStack) -> Boolean> = node.permEntries.map { (overrideName, default) ->
+        val segment = overrideName ?: node.pathSegment
+        val fullPermission = if (parentPath == null) segment else "$parentPath.$segment"
         PermissionRegistry.queue(fullPermission, default)
         val predicate: (CommandSourceStack) -> Boolean = { src -> src.sender.hasPermission(fullPermission) }
         predicate
