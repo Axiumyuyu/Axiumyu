@@ -229,8 +229,8 @@ fun ItemStack.removeEnch(ench: Enchantment) {
     }
 }
 
-inline fun itemStack(type: ItemType, data: ItemStack.() -> Unit): ItemStack {
-    return  type.createItemStack(1).apply(data)
-}
+val ItemType.Typed<*>.itemStack get() = this.createItemStack(1)
 
-fun itemStack(type: ItemType) = type.createItemStack(1)
+fun ItemType.Typed<*>.of(data: ItemStack.() -> Unit): ItemStack {
+    return createItemStack(1).apply(data)
+}
