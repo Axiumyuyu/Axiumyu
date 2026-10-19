@@ -5,14 +5,18 @@ package xyz.axiumyu
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ItemEnchantments
 import io.papermc.paper.datacomponent.item.ItemLore
+import io.papermc.paper.datacomponent.item.WrittenBookContent
 import io.papermc.paper.registry.RegistryAccess.registryAccess
 import io.papermc.paper.registry.RegistryKey
+import io.papermc.paper.text.Filtered
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Keyed
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import kotlin.math.cos
@@ -137,3 +141,57 @@ fun ItemStack.damage(damage: Int = 1){
  */
 fun <T : Keyed> getRegistries(category: RegistryKey<T>): List<String> =
     registryAccess().getRegistry(category).stream().map { it.key.toString() }.toList()
+
+/**
+ * 为玩家主手的物品签名，若为书与笔则按原版逻辑签名，若为成书则覆盖原有签名，均保留设置的自定义item_model（若有），若不含有这两个数据则不进行任何操作
+ */
+fun Player.signBook(title: String) {
+    val item = inventory.itemInMainHand
+    if (item.isEmpty) return
+
+    val written = item.getData(DataComponentTypes.WRITTEN_BOOK_CONTENT)
+    val writable = item.getData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+
+    if (written != null) {
+        // 已有成书组件：更新标题与作者，保留页面、generation、resolved
+        val builder = WrittenBookContent.writtenBookContent(title, name)
+            .generation(written.generation())
+            .resolved(written.resolved())
+        builder.addFilteredPages(written.pages() as List<Filtered<out ComponentLike>>)
+
+        item.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
+
+        // 若同时存在书与笔组件，删除之
+        if (writable != null) {
+            item.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+        }
+    } else if (writable != null) {
+        // 仅有书与笔组件：转换为成书
+        val builder = WrittenBookContent.writtenBookContent(title, name)
+
+        for (page in writable.pages()) {
+            val raw = Component.text(page.raw())
+            val filtered = page.filtered()?.let { Component.text(it) }
+            if (filtered != null) {
+                builder.addFilteredPage(Filtered.of(raw, filtered))
+            } else {
+                builder.addPage(raw)
+            }
+        }
+
+        item.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
+        item.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+    } else {
+        // 既不是书与笔也不是成书，无操作
+        return
+    }
+
+    // ITEM_MODEL 处理
+    val currentModel = item.getData(DataComponentTypes.ITEM_MODEL)
+    val writableBookModel = NamespacedKey.minecraft("writable_book")
+    val writtenBookModel = NamespacedKey.minecraft("written_book")
+
+    if (currentModel == null || currentModel == writableBookModel) {
+        item.setData(DataComponentTypes.ITEM_MODEL, writtenBookModel)
+    }
+}

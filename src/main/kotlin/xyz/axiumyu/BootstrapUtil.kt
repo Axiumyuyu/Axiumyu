@@ -73,7 +73,7 @@ fun LifecycleEventManager<BootstrapContext>.registerDialog(
  * **不允许动态注册，所有注册必须在Bootstrap阶段完成**
  */
 fun LifecycleEventManager<BootstrapContext>.registerLoreEnchantment(
-    namespace: String,
+    namespace: String = SV,
     key: String,
     desc: String,
     maxLevel: Int = 1
