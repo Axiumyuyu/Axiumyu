@@ -1,0 +1,17 @@
+name: Release
+
+# 通用发版逻辑在 Axiumyuyu/gh-workflows，这里只传这个仓库的参数。
+# 版本号取自 gradle.properties 的 version=，tag 与之同名。
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: Axiumyuyu/gh-workflows/.github/workflows/release-gradle.yml@master
+    permissions:
+      contents: write
+    with:
+      gradle-task: build sourcesJar
+      artifact-exclude: "*-test.jar,*-javadoc.jar,*-plain.jar"

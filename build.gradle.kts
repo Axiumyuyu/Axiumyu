@@ -45,6 +45,14 @@ kotlin {
     jvmToolchain(21)
 }
 
+// 源码包：随 release 一起上传，方便对照 tag 里的代码
+tasks.register<org.gradle.jvm.tasks.Jar>("sourcesJar") {
+    group = "build"
+    description = "打包 Kotlin/Java 源码"
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
 tasks {
     build {
         dependsOn(shadowJar)
