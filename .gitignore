@@ -21,3 +21,5 @@ hs_err_pid*
 run
 
 .directory
+# 通用 workflow 暂存目录（推到 gh-workflows 仓库后删除）
+_ghw/
