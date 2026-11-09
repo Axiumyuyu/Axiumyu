@@ -13,7 +13,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Keyed
-import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -148,26 +147,33 @@ fun <T : Keyed> getRegistries(category: RegistryKey<T>): List<String> =
 fun Player.signBook(title: String) {
     val item = inventory.itemInMainHand
     if (item.isEmpty) return
+    item.signBook(title, name)
+}
 
-    val written = item.getData(DataComponentTypes.WRITTEN_BOOK_CONTENT)
-    val writable = item.getData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+/**
+ * 为玩家主手的物品签名，若为书与笔则按原版逻辑签名，若为成书则覆盖原有签名，均保留设置的自定义item_model（若有），若不含有这两个数据则不进行任何操作
+ */
+fun ItemStack.signBook(title: String, author: String) {
+
+    val written = this.getData(DataComponentTypes.WRITTEN_BOOK_CONTENT)
+    val writable = this.getData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
 
     if (written != null) {
         // 已有成书组件：更新标题与作者，保留页面、generation、resolved
-        val builder = WrittenBookContent.writtenBookContent(title, name)
+        val builder = WrittenBookContent.writtenBookContent(title, author)
             .generation(written.generation())
             .resolved(written.resolved())
         builder.addFilteredPages(written.pages() as List<Filtered<out ComponentLike>>)
 
-        item.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
+        this.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
 
         // 若同时存在书与笔组件，删除之
         if (writable != null) {
-            item.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+            this.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
         }
     } else if (writable != null) {
         // 仅有书与笔组件：转换为成书
-        val builder = WrittenBookContent.writtenBookContent(title, name)
+        val builder = WrittenBookContent.writtenBookContent(title, author)
 
         for (page in writable.pages()) {
             val raw = Component.text(page.raw())
@@ -179,19 +185,19 @@ fun Player.signBook(title: String) {
             }
         }
 
-        item.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
-        item.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
+        this.setData(DataComponentTypes.WRITTEN_BOOK_CONTENT, builder.build())
+        this.unsetData(DataComponentTypes.WRITABLE_BOOK_CONTENT)
     } else {
         // 既不是书与笔也不是成书，无操作
         return
     }
 
     // ITEM_MODEL 处理
-    val currentModel = item.getData(DataComponentTypes.ITEM_MODEL)
+    val currentModel = this.getData(DataComponentTypes.ITEM_MODEL)
     val writableBookModel = NamespacedKey.minecraft("writable_book")
     val writtenBookModel = NamespacedKey.minecraft("written_book")
 
     if (currentModel == null || currentModel == writableBookModel) {
-        item.setData(DataComponentTypes.ITEM_MODEL, writtenBookModel)
+        this.setData(DataComponentTypes.ITEM_MODEL, writtenBookModel)
     }
 }

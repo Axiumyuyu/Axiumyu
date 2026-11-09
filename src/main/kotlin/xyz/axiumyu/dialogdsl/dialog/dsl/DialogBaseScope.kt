@@ -74,7 +74,7 @@ class DialogBaseScope(
     }
 
     // --- Single Option Input ---
-    fun SingleOptionInput(
+    inline fun SingleOptionInput(
         id: String,
         name: Component,
         initial: String? = null,
@@ -91,7 +91,7 @@ class DialogBaseScope(
         )
     }
 
-    fun <T : Enum<T>> SingleOptionInput(
+    inline fun <T : Enum<T>> SingleOptionInput(
         id: String,
         name: Component,
         initial: T,

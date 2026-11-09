@@ -16,7 +16,7 @@ class AxiumyuLoader implements PluginLoader {
                 new RemoteRepository.Builder("central", "default", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR).build()
         );
         resolver.addDependency(
-                new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.4.20"), null)
+                new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.4.21"), null)
         );
         resolver.addDependency(new Dependency(
                 new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.11.0"), null)

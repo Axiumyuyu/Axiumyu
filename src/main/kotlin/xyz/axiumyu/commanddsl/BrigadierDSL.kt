@@ -69,7 +69,7 @@ sealed class BaseNode(val name: String, val permPrefix: String? = null) {
     // ------------------------------------------------------------------
 
     /** 在当前节点下创建一个 literal 子节点（PascalCase：`Node(...)`，需求 3.1）。 */
-    fun Node(
+    inline fun Node(
         name: String,
         permPrefix: String? = null,
         block: LiteralNodeBuilder.() -> Unit = {}
@@ -81,7 +81,7 @@ sealed class BaseNode(val name: String, val permPrefix: String? = null) {
     }
 
     /** 在当前节点下创建一个参数子节点（PascalCase：`Argument(...)`，需求 3.1）。 */
-    fun <T : Any> Argument(
+    inline fun <T : Any> Argument(
         name: String,
         type: ArgumentType<T>,
         block: ArgumentNodeBuilder.() -> Unit = {}
@@ -194,7 +194,7 @@ class ArgumentNodeBuilder(
  * 当该调用出现在某个 Node/Argument 闭包内部时，Kotlin 会优先解析到 [BaseNode.Node] 成员函数，
  * 从而自动完成挂载；只有在没有隐式接收者的顶层作用域，才会落到这里。
  */
-fun Node(
+inline fun Node(
     name: String,
     permPrefix: String? = null,
     block: LiteralNodeBuilder.() -> Unit = {}
@@ -205,7 +205,7 @@ fun Node(
 }
 
 /** 顶层版本的 `Argument`，语义同上。 */
-fun <T : Any> Argument(
+inline fun <T : Any> Argument(
     name: String,
     type: ArgumentType<T>,
     block: ArgumentNodeBuilder.() -> Unit = {}
